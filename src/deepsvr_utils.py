@@ -60,26 +60,66 @@ class ReadCount:
         Returns:
             dict of bam-readcount
         """
-        file = open(file_path)
-        counts = {}
-        for line in file:
-            match = re.match(r'(^[\w|.]+\t\d+\t\w\t\d+)', line)
-            if match is not None:
-                count = re.split('\t|:', line.strip())
-                position = '{0}:{1}'.format(count[0], count[1])
+        with open(file_path) as file:
+            counts = {}
+            for line in file:
+                # Check if line looks valid (starts with chr, pos, ref, depth)
+                # A simple check is used rather than a strict regex on the whole line first
+                parts = line.strip().split('\t')
+                
+                if len(parts) < 4:
+                    continue
+
+                # Parse Metadata
+                chromosome = parts[0]
+                
+                try:
+                    position_val = int(parts[1])
+                    depth_val = int(parts[3])
+                except ValueError:
+                    # If header or malformed line
+                    continue
+
+                position = '{0}:{1}'.format(chromosome, position_val)
+                
                 metrics = {}
-                metrics['chromosome'] = count[0]
-                metrics['position'] = int(count[1])
-                metrics['ref'] = count[2]
-                metrics['depth'] = int(count[3])
+                metrics['chromosome'] = chromosome
+                metrics['position'] = position_val
+                metrics['ref'] = parts[2]
+                metrics['depth'] = depth_val
+                
                 bases = {}
-                for i in range(4, len(count), 15):
-                    b = list(map(to_numeric, count[i + 1: i + 15]))
-                    # if not all(x == 0 for x in b):
-                    if count[i] != '=':
-                        bases[count[i]] = dict(zip(BASE_METRICS, b))
+                
+                # Iterate over the base data blocks (index 4 onwards)
+                # Each block looks like: Base:count:avg_map_qual:...
+                for base_str in parts[4:]:
+                    base_data = base_str.split(':')
+
+                    # 0 is appended to the list to account for the missing 
+                    # "avg_distance_to_effective_5p_end" field in bam-readcount
+                    ## Important: Identified bug where truncated base data 
+                    # i.e not including "avg_distance_to_effective_5p_end" 
+                    # results in feature table order to be messed up.
+                    base_data.append(0)
+
+                    base_char = base_data[0]
+                    
+                    # Skip the reference marker '='
+                    if base_char == '=':
+                        continue
+                    
+                    # Convert the rest of the fields besides Nucleotide i.e base_data[0] to numeric
+                    # Zip is used to map them to BASE_METRICS. 
+                    # if there are extra fields, they are ignored
+                    # If there are fewer fields, it is truncated and results in Null Values in Feature table
+                    # However, it cause the order of the feature table to be messed up so this must be avoided at all costs.
+                    # Presence of Null Values will cause the model to crash during prediction, so it needs to be accounted for.
+                    numeric_values = list(map(to_numeric, base_data[1:]))
+                    bases[base_char] = dict(zip(BASE_METRICS, numeric_values))
+
                 metrics['bases'] = bases
                 counts[position] = metrics
+                
         return counts
 
     def compute_variant_metrics(self, var_bed_file_path,
@@ -279,7 +319,7 @@ class ReadCount:
                 # add all zero metrics for indels absent from count file
                 keys = ['{0}_{1}'.format(prepend_string, i) for i in
                         BASE_METRICS]
-                print(keys)
+                # print(keys)
                 self.read_count_dict.setdefault(variant_site, {}).update(
                     dict.fromkeys(keys, 0))
 
