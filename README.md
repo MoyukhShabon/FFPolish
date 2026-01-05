@@ -108,13 +108,21 @@ Then run FFPolish from the newly created conda environment created:
 ## Source Code modifications
 
 The `filter.py` script was modified to:
+
 1. Allow automatic detection of VCF or VCF.GZ files. Only VCF.GZ files were supported previously.
+
 2. Save timing statistics for each major block of the pipeline (Data Preparation (Pre-Processing and Feature Extraction), Model Inference, Post Processing as well as Total Execution).
-3. Obtain class 1 probability scores from the classifier. This is used to better assess performance instead of the internal hard score cutoff.
+
+3. Obtain class 1 probability scores from the classifier. This is used to better assess performance instead of using binary scores derived from predictions made using the predetermined internal cutoff.
+
 4. Save features before and after hard filtering steps. FFPolish performs hard filtering before inference (Tumor Depth > 10, Tumor VAF > 0.05, Reads Supporting Alt Allele > 4)
+
 5. Save a final output with the class 1 (real mutations) probability scores, prediction, and features of all SNVs including those filtered out by hard filters. The Hard-Filtered SNVs were assigned with score of 0 and prediction of 0 (artifact).
+
 6. The original code outputs a filtered VCF. This VCF filtering block is retained but commented out as it is not required for performance evaluation.
+
 7. Added feature table order list to ensure consistent column ordering, to avoid any bugs resulting from edge cases. Refer to modifications made to `deepsvr_utils.py` for details.
+
 8. Older versions of scikit-learn did not have the clip attribute for `MinMaxScaler` and did not clip features but newer versions expects it to be explicitly stated. Therefore, the clip attribute was explicitly added to the trained scaler.
 	```python
 	if not hasattr(scaler, 'clip'):
