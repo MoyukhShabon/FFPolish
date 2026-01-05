@@ -195,9 +195,9 @@ def filter(ref, vcf, bam, outdir, prefix, retrain, grid_search, cores, seed, log
                 clf = joblib.load(os.path.join(BASE, 'models', 'trained.clf'))
                 scaler = joblib.load(os.path.join(BASE, 'models', 'trained.scaler'))
 
-                ## Newer Scikit-Learn requires the clip attribute
-                # if not hasattr(scaler, 'clip'):
-                #     scaler.clip = False
+                # MODIFICATION: Newer Scikit-Learn requires the clip attribute
+                if not hasattr(scaler, 'clip'):
+                    scaler.clip = False
 
                 os.makedirs(outdir, exist_ok=True)
 
@@ -243,7 +243,7 @@ def filter(ref, vcf, bam, outdir, prefix, retrain, grid_search, cores, seed, log
 
         # --- Inference Block ---
         # Includes Scaling and Prediction
-        with PerformanceTimer("Inference", timing_records):        
+        with PerformanceTimer("Scaling and Inference", timing_records):  
             logger.info('Scaling features')
             df_scaled = scaler.transform(df)
 
@@ -299,15 +299,15 @@ def filter(ref, vcf, bam, outdir, prefix, retrain, grid_search, cores, seed, log
 
         # --------------------------------
 
-        # --- Modification: Save Timing Data ---
-        # Convert the list of dicts to a DataFrame
-        df_timing = pd.DataFrame(timing_records)
-        df_timing["time_minutes"] = round(df_timing["time_seconds"] / 60.0, 4)
+    # --- Modification: Save Timing Data ---
+    # Convert the list of dicts to a DataFrame
+    df_timing = pd.DataFrame(timing_records)
+    df_timing["time_minutes"] = round(df_timing["time_seconds"] / 60.0, 4)
 
-        # Save to CSV
-        timing_output_path = os.path.join(outdir, f"{prefix}.timing_stats.csv")
-        df_timing.to_csv(timing_output_path, index=False)
+    # Save to CSV
+    timing_output_path = os.path.join(outdir, f"{prefix}.timing_stats.tsv")
+    df_timing.to_csv(timing_output_path, sep="\t", index=False)
 
-        logger.info(f'Timing statistics saved to {timing_output_path}')  
+    logger.info(f'Timing statistics saved to {timing_output_path}')  
 
 
