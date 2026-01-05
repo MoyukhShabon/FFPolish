@@ -91,7 +91,7 @@ Dependencies were therefore manually solved via trial and error. Working set of 
 conda create -n ffpolish -c conda-forge -c bioconda python=3.8 convert_zero_one_based pandas numpy scikit-learn tqdm pysam vaex bam-readcount bedops "python-utils<3.8.0"
 ```
 
-Then install ffpolish manually by navigate to the `src` directory and running:
+Then install ffpolish manually by navigating to the `src` directory and running:
 
 ```bash
 ln -s cli.py ffpolish
@@ -121,7 +121,7 @@ The `filter.py` script was modified to:
 		scaler.clip = False
 	```
 
-The `deepsvr_utils.py` script was also modified to tron out issues with parsing the **bam-readcount** output:
+The `deepsvr_utils.py` script was also modified to iron out issues with parsing the **bam-readcount** output:
 
 1. The original deepsvr_utils.py file uses regular expressions to parse the **bam-readcount** output. This causes downstream issues when parsing leading to an error, likely due to changes in the **bam-readcount** output format. Aa a result, the original script does not parse fields in the expected order and and tries to cast non-numeric strings such as nucleotide bases to numeric types causing the pipeline to fail. This modified version parses the **bam-readcount** output more gracefully by splitting lines on tabs and accessing fields by their index positions.
 
