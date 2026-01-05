@@ -87,9 +87,9 @@ The installation procedure laid out by the author did not work as conda could no
 
 Dependencies were therefore manually solved via trial and error. Working set of dependencies can be installed using conda via the following command:
 
-```
-conda create -n ffpolish -c conda-forge -c bioconda python=3.8 convert_zero_one_based pandas numpy scikit-learn tqdm pysam vaex bam-readcount bedops "python-utils<3.8.0"
-```
+	```bash
+	conda create -n ffpolish -c conda-forge -c bioconda python=3.8 convert_zero_one_based pandas numpy scikit-learn tqdm pysam vaex bam-readcount bedops "python-utils<3.8.0"
+	```
 
 Then install ffpolish manually by navigating to the `src` directory and running:
 
@@ -100,10 +100,10 @@ echo "export PATH=\$PATH:$(dirname $(readlink -f ffpolish))" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-Then run FFPolish from the conda environment previously created:
-		```bash
-			conda activate ffpolish
-		```
+Then run FFPolish from the newly created conda environment created:
+	```bash
+		conda activate ffpolish
+	```
 
 ## Source Code modifications
 
