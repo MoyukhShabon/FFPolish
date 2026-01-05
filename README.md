@@ -134,3 +134,9 @@ The `deepsvr_utils.py` script was also modified to iron out issues with parsing 
 1. The original deepsvr_utils.py file uses regular expressions to parse the **bam-readcount** output. This causes downstream issues when parsing leading to an error, likely due to changes in the **bam-readcount** output format. Aa a result, the original script does not parse fields in the expected order and and tries to cast non-numeric strings such as nucleotide bases to numeric types causing the pipeline to fail. This modified version parses the **bam-readcount** output more gracefully by splitting lines on tabs and accessing fields by their index positions.
 
 2. **bam-readcount** also does not provide `avg_distance_to_effective_5p_end` but FFPolish expects it. It was discovered that FFPolish's author requested this feature to be added to in the BAM ReadCount repository but this does not exist as of current date. So, my assumption is that this is a placeholder feature. Therefore, `avg_distance_to_effective_5p_end` was filled in with 0s during parsing. As it was discovered that missing `avg_distance_to_effective_5p_end` messes up column orders of the final feature table leading to flawed inference, unless explicitly handled during parsing.
+
+
+## To Do
+
+- Update the conda recipe
+
