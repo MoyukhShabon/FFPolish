@@ -8,9 +8,9 @@ Ensure that you have the `conda-forge` and `bioconda` channels in the correct pr
 ```
 conda config --show channels
 channels:
-  - conda-forge
-  - bioconda
-  - defaults
+	- conda-forge
+	- bioconda
+	- defaults
 ```
 
 If the above command doesn't have the correct output, run:
@@ -101,9 +101,9 @@ source ~/.bashrc
 ```
 
 Then run FFPolish from the conda environment previously created:
-  ```bash
-    conda activate ffpolish
-  ```
+		```bash
+			conda activate ffpolish
+		```
 
 ## Source Code modifications
 
@@ -116,13 +116,13 @@ The `filter.py` script was modified to:
 6. The original code outputs a filtered VCF. This VCF filtering block is retained but commented out as it is not required for performance evaluation.
 7. Added feature table order list to ensure consistent column ordering, to avoid any bugs resulting from edge cases. Refer to modifications made to `deepsvr_utils.py` for details.
 8. Older versions of scikit-learn did not have the clip attribute for `MinMaxScaler` and did not clip features but newer versions expects it to be explicitly stated. Therefore, the clip attribute was explicitly added to the trained scaler.
-  ```python
-  if not hasattr(scaler, 'clip'):
-    scaler.clip = False
-  ```
+	```python
+	if not hasattr(scaler, 'clip'):
+		scaler.clip = False
+	```
 
-The `deepsvr_utils.py` script was also modified to tron out issues with parsing the bam-readcount output:
+The `deepsvr_utils.py` script was also modified to tron out issues with parsing the **bam-readcount** output:
 
-1. The original deepsvr_utils.py file uses regular expressions to parse the bam-readcount output. This causes downstream issues when parsing leading to an error, likely due to changes in the bam-readcount output format. Aa a result, the original script does not parse fields in the expected order and and tries to cast non-numeric strings such as nucleotide bases to numeric types causing the pipeline to fail. This modified version parses the bam-readcount output more gracefully by splitting lines on tabs and accessing fields by their index positions.
+1. The original deepsvr_utils.py file uses regular expressions to parse the **bam-readcount** output. This causes downstream issues when parsing leading to an error, likely due to changes in the **bam-readcount** output format. Aa a result, the original script does not parse fields in the expected order and and tries to cast non-numeric strings such as nucleotide bases to numeric types causing the pipeline to fail. This modified version parses the **bam-readcount** output more gracefully by splitting lines on tabs and accessing fields by their index positions.
 
-2. bam-readcount also does not provide `avg_distance_to_effective_5p_end` but FFPolish expects it. It was discovered that FFPolish's author requested this feature to be added to in the BAM ReadCount repository but this does not exist as of current date. So, my assumption is that this is a placeholder feature. Therefore, `avg_distance_to_effective_5p_end` was filled in with 0s during parsing. As it was discovered that missing `avg_distance_to_effective_5p_end` messes up column orders of the final feature table leading to flawed inference, unless explicitly handled during parsing.
+2. **bam-readcount** also does not provide `avg_distance_to_effective_5p_end` but FFPolish expects it. It was discovered that FFPolish's author requested this feature to be added to in the BAM ReadCount repository but this does not exist as of current date. So, my assumption is that this is a placeholder feature. Therefore, `avg_distance_to_effective_5p_end` was filled in with 0s during parsing. As it was discovered that missing `avg_distance_to_effective_5p_end` messes up column orders of the final feature table leading to flawed inference, unless explicitly handled during parsing.
